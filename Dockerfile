@@ -1,13 +1,14 @@
-FROM python:3.12-slim
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# Copy dependency files first to leverage cache
+COPY pyproject.toml uv.lock ./
 
-# Copy project files
-COPY pyproject.toml ./
+# Install dependencies into a virtualenv
+RUN uv sync --frozen
+
 COPY main.py ./
 
 # Install dependencies using uv
@@ -17,4 +18,4 @@ RUN uv sync --frozen
 EXPOSE 8001
 
 # Run the server
-CMD ["uv", "run", "python", "main.py"]
+CMD ["uv", "run", "python", "main.py", "--host", "0.0.0.0", "--port", "8001"]
