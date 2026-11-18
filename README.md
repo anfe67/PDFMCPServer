@@ -33,6 +33,7 @@ An MCP (Model Context Protocol) server that provides tools for reading and proce
 - **Get PDF Info**: Retrieve metadata and information about PDF files (page count, file size, metadata, encryption status)
 - **List PDFs**: List all PDF files in a directory
 
+
 ## Installation
 
 Ensure you have Python 3.12+ and `uv` installed.
@@ -40,6 +41,7 @@ Ensure you have Python 3.12+ and `uv` installed.
 ```bash
 uv sync
 ```
+
 
 ## Deployment
 
@@ -55,6 +57,7 @@ docker run -p 8001:8001 pdf-mcp-server
 
 The server will be available at `http://localhost:8001/mcp`.
 
+
 ### read_pdf
 Reads a PDF file and extracts all text content.
 
@@ -62,6 +65,7 @@ Reads a PDF file and extracts all text content.
 - `file_path` (string): Absolute or relative path to the PDF file
 
 **Returns:** Extracted text content from all pages, or error message if file cannot be read
+
 
 ### read_pdf_page
 Reads a specific page from a PDF file.
@@ -72,6 +76,7 @@ Reads a specific page from a PDF file.
 
 **Returns:** Extracted text from the specified page, or error message
 
+
 ### get_pdf_info
 Gets metadata and information about a PDF file.
 
@@ -79,6 +84,7 @@ Gets metadata and information about a PDF file.
 - `file_path` (string): Absolute or relative path to the PDF file
 
 **Returns:** Dictionary with PDF metadata including page count, metadata, file size, and encryption status
+
 
 ### list_pdfs
 Lists all PDF files in a directory.
@@ -88,12 +94,14 @@ Lists all PDF files in a directory.
 
 **Returns:** List of PDF file paths found in the directory
 
+
 ## Project structure
 
 - `main.py`: Entry point containing the FastMCP server definition and PDF tools
 - `pyproject.toml`: Project configuration and dependencies
 - `tests/`: Test suite with unit and integration tests
 - `tests/fixtures/`: Sample PDF files for testing
+
 
 ## Running tests
 
@@ -107,6 +115,7 @@ uv run python -m pytest tests/test_unit.py
 # Run only integration tests
 uv run python -m pytest tests/test_integration.py
 ```
+
 
 ## Example Usage
 
@@ -132,9 +141,50 @@ Once the server is running, you can use the MCP tools to interact with PDF files
    read_pdf_page("/path/to/document.pdf", 3)
    ```
 
+
 ## Notes
 
 - The server uses `pypdf` for PDF processing
 - Image-based PDFs (scanned documents) may not return text content
 - Encrypted PDFs will report encryption status but cannot be read without decryption
 - The server includes CORS middleware for browser-based clients
+
+
+## Configuration
+
+### Local (uv)
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "pdf-mcp-server": {
+        "type": "local",
+        "command": ["uv", "run", "python", "main.py", "--host", "0.0.0.0", "--port", "8001"],
+        "env": {
+          "PYTHONPATH": "."
+        }
+      }
+    }
+  }
+}
+```
+
+### Docker Compose
+
+When running via Docker Compose, use `type: remote` to connect to the mapped port:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "pdf-mcp-server": {
+        "type": "remote",
+        "url": "http://localhost:8001/mcp"
+      }
+    }
+  }
+}
+```
