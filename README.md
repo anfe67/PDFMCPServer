@@ -1,6 +1,30 @@
 # PDF MCP Server
 
+```mermaid
+sequenceDiagram
+    participant Client as LLM Inference Client (e.g. llama.cpp)
+    participant MCP as PDF MCP Server (this project)
+    participant PDF as PDF File
+
+    Note over Client, MCP: MCP Protocol (HTTP/JSON-RPC)
+
+    Client->>MCP: list_tools()
+    MCP-->>Client: returns [read_pdf, get_pdf_info, ...]
+
+    Client->>MCP: call_tool("read_pdf", {file_path: "doc.pdf"})
+    activate MCP
+    MCP->>PDF: read content
+    activate PDF
+    PDF-->>MCP: file content
+    deactivate PDF
+    MCP-->>Client: tool output (text content)
+    deactivate MCP
+
+    Note over Client: LLM processes content
+```
+
 An MCP (Model Context Protocol) server that provides tools for reading and processing PDF files.
+
 
 ## Features
 
