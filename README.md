@@ -17,15 +17,19 @@ Ensure you have Python 3.12+ and `uv` installed.
 uv sync
 ```
 
-## Running the server
+## Deployment
+
+### Docker deployment
 
 ```bash
-uv run python main.py
+# Build the Docker image
+docker build -t pdf-mcp-server .
+
+# Run the container
+docker run -p 8001:8001 pdf-mcp-server
 ```
 
-The server will be available via HTTP at `http://localhost:8001/mcp`. If running in a container, use `http://<host>:8001/mcp`.
-
-## Available Tools
+The server will be available at `http://localhost:8001/mcp`.
 
 ### read_pdf
 Reads a PDF file and extracts all text content.
