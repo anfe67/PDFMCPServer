@@ -4,7 +4,12 @@ services:
     container_name: pdf-mcp-server
     ports:
       - "8001:8001"
+    env_file:
+      - .env
     volumes:
-      # Mount a directory to access PDF files from the host
-      - ./pdfs:/app/pdfs:ro
+      - pdf-data:${PDF_STORAGE_DIR:-/data/pdfs}
     restart: unless-stopped
+
+volumes:
+  pdf-data:
+

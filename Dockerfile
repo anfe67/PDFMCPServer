@@ -1,5 +1,8 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
+# Create data directory for uploaded PDFs
+RUN mkdir -p /data/pdfs && chmod 777 /data/pdfs
+
 # Set working directory
 WORKDIR /app
 
