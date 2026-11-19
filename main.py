@@ -1,14 +1,7 @@
 import os
-import base64
-import shutil
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from fastmcp import FastMCP
-from pypdf import PdfReader
-from starlette.middleware import Middleware
-from starlette.middleware.cors import CORSMiddleware
 
 # Configure storage directory with environment variable support
 STORAGE_DIR = Path(os.getenv("PDF_STORAGE_DIR", "/data/pdfs"))
@@ -28,8 +21,6 @@ mcp = FastMCP("PDF Reader")
 # Expose the storage directory as a resource so clients know where it is
 import os
 import base64
-import shutil
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
