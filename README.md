@@ -57,6 +57,42 @@ docker run -p 8001:8001 pdf-mcp-server
 
 The server will be available at `http://localhost:8001/mcp`.
 
+#### Mapping a host directory (Recommended)
+
+To easily access the PDF storage directory from your host machine, use a bind mount. Set the `HOST_STORAGE_DIR` environment variable to point to your desired local directory:
+
+```bash
+# Create a directory on your host
+mkdir ~/my-pdfs
+
+# Run the container with the host directory mapped
+docker run -p 8001:8001 \
+  -e HOST_STORAGE_DIR="$HOME/my-pdfs" \
+  pdf-mcp-server
+```
+
+Now, any PDFs you upload via the server will appear in `~/my-pdfs` on your host, and any PDFs you place there will be available to the server.
+
+#### Using Docker Compose
+
+You can also use Docker Compose with a bind mount:
+
+```yaml
+services:
+  pdf-mcp-server:
+    build: .
+    container_name: pdf-mcp-server
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./my-host-pdf-dir:/data/pdfs
+    restart: unless-stopped
+```
+
+The server will be available at `http://localhost:8001/mcp`.
+
 
 ### read_pdf
 Reads a PDF file and extracts all text content.

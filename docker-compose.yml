@@ -7,9 +7,13 @@ services:
     env_file:
       - .env
     volumes:
-      - pdf-data:${PDF_STORAGE_DIR:-/data/pdfs}
+      # Use a bind mount if HOST_STORAGE_DIR is set, otherwise fallback to named volume
+      - ${HOST_STORAGE_DIR:-pdf-data}:/data/pdfs
     restart: unless-stopped
 
 volumes:
   pdf-data:
+
+
+
 
