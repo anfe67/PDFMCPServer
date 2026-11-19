@@ -102,6 +102,15 @@ Lists all PDF files in a directory.
 - `tests/`: Test suite with unit and integration tests
 - `tests/fixtures/`: Sample PDF files for testing
 
+## Local files
+
+Both are committed:
+
+- `.env`: local environment configuration, e.g. `PDF_STORAGE_DIR` (the directory
+  where uploaded PDFs are stored).
+- `storage/`: the runtime PDF storage directory — PDFs uploaded via
+  `upload_pdf` are written here.
+
 
 ## Running tests
 
