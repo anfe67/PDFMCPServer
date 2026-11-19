@@ -200,7 +200,7 @@ When running via Docker Compose, use `type: remote` to connect to the mapped por
 
 ## Test review
 
-Yes, the tests make sense overall — the suite (34 tests) covers the legacy tools and the new storage system, with real happy-path coverage on fixtures and error-path coverage for missing files. Caveats are noted inline where a test is weak, redundant, or fails to exercise what its name says.
+The test suite (34 tests) covers the legacy tools and the new storage system, with real happy-path coverage on fixtures and error-path coverage for missing files.
 
 | File / Method | Description | Purpose |
 |---|---|---|
