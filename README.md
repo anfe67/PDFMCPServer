@@ -197,3 +197,44 @@ When running via Docker Compose, use `type: remote` to connect to the mapped por
   }
 }
 ```
+
+## Test review
+
+Yes, the tests make sense overall — the suite (34 tests) covers the legacy tools and the new storage system, with real happy-path coverage on fixtures and error-path coverage for missing files. Caveats are noted inline where a test is weak, redundant, or fails to exercise what its name says.
+
+| File / Method | Description | Purpose |
+|---|---|---|
+| test_unit.py :: test_read_pdf_file_not_found | read_pdf on a nonexistent path | Certify read_pdf returns "Error: File not found" |
+| test_unit.py :: test_read_pdf_not_a_file | read_pdf("/tmp") | Certify read_pdf rejects non-file paths ("Path is not a file") |
+| test_unit.py :: test_read_pdf_not_pdf_extension | read_pdf on a .txt file | Certify read_pdf rejects non-.pdf extensions |
+| test_unit.py :: test_read_pdf_page_file_not_found | read_pdf_page on missing file | Certify read_pdf_page returns "Error: File not found" |
+| test_unit.py :: test_read_pdf_page_invalid_page_number | read_pdf_page(nonexistent, 0) | Weak: passes the file-not-found branch; the page-0 range check is never exercised (covered only in integration tests) |
+| test_unit.py :: test_get_pdf_info_file_not_found | get_pdf_info on missing file | Certify error dict contains "File not found" |
+| test_unit.py :: test_get_pdf_info_not_a_file | get_pdf_info("/tmp") | Certify rejection of directories |
+| test_unit.py :: test_get_pdf_info_not_pdf_extension | get_pdf_info on .txt | Certify rejection of non-PDF extension |
+| test_unit.py :: test_list_pdfs_directory_not_found | list_pdfs("/nonexistent/directory") | Certify error entry "Directory not found" |
+| test_unit.py :: test_list_pdfs_not_a_directory | list_pdfs(file path) | Certify "Error: Path is not a directory" |
+| test_unit.py :: test_list_pdfs_empty_directory | list_pdfs(empty temp dir) | Certify "No PDF files found" |
+| test_unit.py :: test_upload_pdf_invalid_filename | upload_pdf("malicious.exe") | Certify upload rejects non-.pdf extensions |
+| test_unit.py :: test_upload_pdf_empty_content | upload_pdf("empty.pdf", "") | Weak: tautological OR assertion; side effect: creates storage/pdfs/empty.pdf |
+| test_unit.py :: test_upload_pdf_invalid_base64 | upload_pdf("invalid.pdf", "not-base64-content!!!") | Weak: b64decode doesn't raise here, so the error path is never tested; only no-crash + cleanup asserted |
+| test_unit.py :: test_delete_pdf_nonexistent | delete_pdf("never-existed.pdf") | Certify "Error: File not found" |
+| test_unit.py :: test_read_pdf_defaults_to_storage | read_pdf() with patched STORAGE_DIR + fake PDF | Weak: loose assertions, doesn't verify default-storage selection |
+| test_unit.py :: test_get_pdf_info_defaults_to_storage | get_pdf_info(None), patched, fake PDF | Weak: accepts "Error reading PDF info" on the fake file |
+| test_unit.py :: test_list_pdfs_defaults_to_storage | list_pdfs() with patched STORAGE_DIR + test.pdf | Certify the default (patched) storage dir is listed |
+| test_unit.py :: test_get_pdf_info_nonexistent | get_pdf_info("/tmp/nonexistent_file_12345.pdf") | Certify error dict "File not found" |
+| test_unit.py :: test_delete_pdf_invalid_filename | delete_pdf("") | Certify "Error: File not found" |
+| test_unit.py :: test_upload_pdf_path_traversal_logic | upload_pdf("../evil.pdf") | Certify basename sanitization; file lands at STORAGE_DIR/"evil.pdf"; uses double-negative assertion `assert not stored_path.parent != STORAGE_DIR` |
+| test_integration.py :: test_read_pdf_integration | read_pdf(fixtures/sample1.pdf) | Certify real text extraction on a real fixture (non-empty result) |
+| test_integration.py :: test_read_pdf_page_integration | read_pdf_page(sample1.pdf, 1) | Certify happy-path page read ("Page 1" or warning) |
+| test_integration.py :: test_get_pdf_info_integration | get_pdf_info(sample1.pdf) | Certify info dict: page_count, file_path, file_size_bytes, file_size_mb, is_encrypted, metadata (page_count>0, size>0) |
+| test_integration.py :: test_list_pdfs_integration | list_pdfs(fixtures_dir) | Certify finds sample1.pdf and lists without errors |
+| test_integration.py :: test_read_pdf_multiple_samples | read_pdf over first 3 fixture PDFs | Weak: no positive assertions; accepts warnings |
+| test_integration.py :: test_get_pdf_info_multiple_samples | get_pdf_info over first 3 fixtures | Weak: only asserts page_count>0, size>0, no errors |
+| test_integration.py :: test_read_pdf_page_out_of_range | read_pdf_page(sample, page_count+1) | Certify "Error … out of range" |
+| test_integration.py :: test_read_pdf_page_negative | read_pdf_page(sample, -1) | Certify "Error … out of range" |
+| test_integration.py :: test_upload_pdf_integration | upload real sample bytes | Certify round-trip: path returned, file exists, size>0, content matches, read_pdf works on uploaded file |
+| test_integration.py :: test_delete_pdf_integration | upload then delete | Certify "Successfully deleted", file gone; delete missing → "Error: File not found" |
+| test_integration.py :: test_upload_path_traversal | upload_pdf("../evil.pdf", …) | Certify basename sanitization in the integration context |
+| test_integration.py :: test_list_pdfs_defaults_to_storage | write test_default.pdf, list_pdfs() | Certify default listing includes the file; all listed paths have parent == STORAGE_DIR |
+| test_integration.py :: test_upload_non_pdf | upload_pdf("malicious.exe", …) | Duplicate of unit #12 (same behavior, same assertion) |
