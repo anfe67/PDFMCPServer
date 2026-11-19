@@ -24,9 +24,6 @@ COPY . .
 # Ensure mcpuser owns the app directory
 RUN chown -R mcpuser:mcpuser /app
 
-# Switch to non-root user for runtime
-USER mcpuser
-
 # Expose port 8001
 EXPOSE 8001
 
